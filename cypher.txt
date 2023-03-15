@@ -1,0 +1,63 @@
+// See complete graph
+MATCH (n) RETURN n
+//
+// Delete all nodes and edges in graph
+MATCH (n) DETACH DELETE n
+
+// Update node labels based on type_ls list
+MATCH (n:Node) 
+CALL apoc.create.addLabels(n, n.node_labels) 
+YIELD node 
+RETURN node
+//
+
+MATCH (n)
+WHERE ANY (x in n.name WHERE x IN ['place', 'great britain', 'country', 'museum', 'TouristAttraction', 'lancaster', 'city', 'birth',
+                'house', 'land','kingdom'])
+RETURN n;
+
+//
+MATCH (n) WHERE ANY (x in n.name WHERE x IN ['king', 'queen', 'son', 'wife', 'kings', 'child', 'uncle','reader','army','george r. r. martin','women','men','heir','rhaenyra','brother','aegon']) 
+SET n.pptu_person = 1;
+MATCH (n)
+WHERE ANY (x in n.name WHERE x IN ['place', 'great britain', 'country', 'museum', 'TouristAttraction', 'lancaster', 'city', 'birth',
+                'house', 'land','kingdom'])
+SET n.pptu_place = 1;
+MATCH (n)
+WHERE ANY (x in n.name WHERE x IN ['thing','thrones', 'throne', 'book','season', 'movie', 'event', 'series', 'crown', 'novel', 'american fantasy' ,'drama' ,'television','tv series'])
+SET n.pptu_thing = 1;
+MATCH (n)
+WHERE n.pptu_person IS NULL
+AND n.pptu_place IS NULL
+AND n.pptu_thing IS NULL
+SET n.pptu_unknown = 1;
+// Create new node label 'Unknown' based on .pptu_unknown
+MATCH (n) 
+WHERE n.pptu_unknown IS NOT NULL 
+CALL apoc.create.addLabels(n, ['Unknown']) 
+YIELD node 
+RETURN node
+
+////
+
+// Create an in-memory, undirected graph of all nodes
+CALL gds.graph.project(
+	'all_nodes',
+    {
+    	AllNodes: {label: 'Node', 
+                   properties: {word_vec_embedding: {property: 'word_vec'}}}
+    },
+    {
+    	AllRels: {type: '*', orientation: 'UNDIRECTED'}
+    }
+)
+YIELD graphName, nodeCount, relationshipCount
+
+//
+// Write node2vec as a property to main DB
+CALL gds.beta.node2vec.write('all_nodes', 
+    { 
+        embeddingDimension: 10, 
+        writeProperty: 'n2v_all_nodes'
+    } 
+)
