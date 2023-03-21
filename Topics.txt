@@ -1,0 +1,9 @@
+Topics covered in NLP course
+
+Topic #1: Language models 
+Topic #2: Lexical semantics/Word embeddings/contextual embeddings 
+Topic #3: Text clustering/Topic Models
+Topic #4: Text classification: logistic regression/Text classification: MLP/CNN
+Topic #5: Text classification: Attention and Bert / Text regression
+Topic #6: POS tagging/Parsing
+Topic #7: Information Extraction/Named Entity Recognition
